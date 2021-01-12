@@ -19,28 +19,43 @@ app.use(
     })
   );
   */
-  app.post("/crop", (req, res) => {
+  app.post("/video", (req, res) => {
+
+    //var spawn = require('child_process').spawn;
+    //var cmd = '/snap/bin/ffmpeg';
     var path = '/home/ooyashi/Downloads/small.mp4'
+    /*
+    var args = [
+      '-i', '/home/ooyashi/Downloads/small.mp4',
+      '-f', 'ffmetadata'
+    ];
+    */
+    //var process = spawn(cmd, args)
     //var file = fs.readFileSync(path, 'binary');
-
-    try {
-      //Problem:
-      //By shell it displays metadata, but node.js for some reason cannot!
-      var process = new ffmpeg(path);
-      process.then(function (video) {
-        // Video metadata
-        console.log(video.metadata);
-        // FFmpeg configuration
-        console.log(video.info_configuration);
-      }, function (err) {
-        console.log('Error: ' + err);
-      });
-    } catch (e) {
-      console.log(e.code);
-      console.log(e.msg);
-    }
+    //ffmpeg -i /home/ooyashi/Downloads/small.mp4 -f ffmetadata - checking metadata by vscode terminal
     
-
+      const {spawn} = require('child_process');
+      
+      const child = spawn('ffmpeg', [
+        '-i',
+        ' /home/ooyashi/Downloads/samplemkv.mkv',
+        ' -f',
+        ' ffmetadata'
+      ])
+      
+     
+      child.stdout.on('data', function(data) {
+        console.log(data);
+    });
+    
+    child.stderr.setEncoding("utf8")
+    child.stderr.on('data', function(data) {
+        console.log(data);
+    });
+  
+    child.on('close', function() {
+    console.log('finished');
+    });
   });
 app.get("/", (req, res) => {
     res.sendFile(__dirname + "/index.html");
