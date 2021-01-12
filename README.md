@@ -1,1 +1,2 @@
 # VideoCropper
+Very primitive videocropper
