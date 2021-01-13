@@ -7,9 +7,6 @@ const { v4: uuidv4 } = require('uuid');
 const multer = require('multer');
 const path = require('path');
 
-var fs = require('fs');
-//var ffmpeg = require('ffmpeg');
-
 const storageConfig = multer.diskStorage({
   destination: function(req, file, cb) {
     cb(null, path.join(__dirname, '../uploads'));
@@ -43,11 +40,6 @@ app.use(bodyParser.json());
     let pathFile = filedata.path;
     //getting file name for crop command
     let fileUploadName = filedata.filename; 
-
-
-    //let completeFile = pathFile + fileUploadName;
-    //console.log(completeFile);
-
     
     var width; 
     var height;
