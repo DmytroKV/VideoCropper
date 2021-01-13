@@ -4,12 +4,21 @@ const bodyParser = require('body-parser');
 const fileUpload = require("express-fileupload");
 const Child_process = require("child_process");
 const { v4: uuidv4 } = require('uuid');
+const multer = require('multer');
+const path = require('path');
 
 var fs = require('fs');
-var ffmpeg = require('ffmpeg');
-var ffmpeg_fluent = require('fluent-ffmpeg');
+//var ffmpeg = require('ffmpeg');
 
-ffmpeg_fluent.setFfprobePath('/snap/bin/ffmpeg.ffprobe');
+const storageConfig = multer.diskStorage({
+  destination: function(req, file, cb) {
+    cb(null, path.join(__dirname, '../uploads'));
+  },
+  filename: function(req, file, cb) {
+    cb(null, file.fieldname + '-' + Date.now() + path.extname(file.originalname));
+  }
+});
+app.use(multer({storage: storageConfig}).single('file'));
 
 app.use(
   fileUpload({
@@ -17,6 +26,8 @@ app.use(
     tempFileDir: "/tmp/",
   })
 );
+
+app.use("/uploads", express.static(__dirname + '/../uploads'));
 app.use("/tmp", express.static(__dirname + '/../tmp'));
 // parse application/x-www-form-urlencoded
 app.use(bodyParser.urlencoded({ extended: false }));
@@ -25,13 +36,19 @@ app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 
   app.post("/video", (req, res) => {
-    //storing file data
-    let file = req.files.file;
-    //getting temporary path file for processing
-    let pathFile = file.tempFilePath;
-    //getting file name for crop command
-    let fileUploadName = file.name; 
 
+    //storing file data   
+    let filedata = req.file;
+    //getting path file for processing
+    let pathFile = filedata.path;
+    //getting file name for crop command
+    let fileUploadName = filedata.filename; 
+
+
+    //let completeFile = pathFile + fileUploadName;
+    //console.log(completeFile);
+
+    
     var width; 
     var height;
 
@@ -58,13 +75,12 @@ app.use(bodyParser.json());
     
     Child_process.execSync(
       `ffmpeg -i ${
-        fileUploadName
+        pathFile
       } -s ${realWidth}:${realHeight} -vf crop=${realHeight}:${realHeight},setdar=1:1,setsar=1:1 ` + filename
     )
     
     //video url for download
     res.json({videoURL : filename});
-    
   });
 app.get("/", (req, res) => {
     res.sendFile(__dirname + "/index.html");
